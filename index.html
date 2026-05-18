@@ -13,6 +13,59 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
 .header{background:linear-gradient(135deg,#1a237e 0%,#283593 50%,#1565c0 100%);color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center}
 .header h1{font-size:16px;font-weight:700;letter-spacing:.5px}
 .header .subtitle{font-size:11px;opacity:.85}
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:768px){
+body{padding:0;font-size:12px}
+.dashboard{border-radius:0;box-shadow:none}
+.header{padding:10px 14px;flex-wrap:wrap;gap:4px}
+.header h1{font-size:14px}
+.header .subtitle{font-size:10px}
+.header>div:last-child{display:none}
+#gsheetTicker{font-size:10px;padding:4px 12px}
+.loaded-bar{flex-wrap:wrap;gap:6px;padding:6px 12px;font-size:10px}
+.loaded-bar .file-info{width:100%;flex-wrap:wrap}
+.tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;white-space:nowrap;display:flex;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{font-size:10px;padding:8px 12px;min-width:fit-content;flex-shrink:0;white-space:nowrap}
+.filters{padding:8px 10px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-group{flex-shrink:0}
+.filter-group label{font-size:9px}
+.filter-group select{font-size:11px;padding:4px 6px;min-width:70px}
+.sub-filter-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none;padding:6px 10px}
+.sub-filter-bar::-webkit-scrollbar{display:none}
+.content{padding:6px 10px}
+.section-title{font-size:11px;padding:4px 8px;display:flex;flex-wrap:wrap;gap:6px}
+.item-type-btns{flex-wrap:wrap;gap:3px}
+.item-type-btn{font-size:10px;padding:3px 8px;min-height:28px}
+.kpi-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px}
+.kpi-card{padding:8px 10px}
+.kpi-label{font-size:9px}
+.kpi-value{font-size:16px}
+table{font-size:10px}
+th,td{padding:4px 5px;font-size:10px}
+.t4dd-menu{max-height:250px;z-index:9999}
+.t4dd-btn{font-size:10px;padding:4px 8px;min-height:28px}
+.month-btn{font-size:10px;padding:4px 8px;min-height:28px;min-width:36px}
+.upload-zone{margin:12px;padding:30px 20px}
+.uz-title{font-size:16px}
+.desc{font-size:11px}
+.insight-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px}
+.insight-card{padding:8px}
+.opp-modal{padding:10px 12px;margin:8px}
+.opp-modal-title{font-size:11px}
+#t5TrChart{height:200px!important}
+.section2-grid{grid-template-columns:1fr!important}
+.btn-action{font-size:10px;padding:4px 8px;min-height:28px}
+select{min-height:28px;font-size:11px}
+.months-container{flex-wrap:wrap;gap:3px}
+}
+@media(max-width:480px){
+.kpi-grid{grid-template-columns:repeat(2,1fr)!important}
+.insight-grid{grid-template-columns:1fr!important}
+.header h1{font-size:12px}
+.tab-btn{font-size:9px;padding:7px 10px}
+}
 .upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;border:3px dashed #9fa8da;border-radius:12px;margin:30px;background:#f5f7ff;cursor:pointer;transition:all .2s}
 .upload-zone:hover,.upload-zone.dragover{border-color:#283593;background:#e8eaf6;transform:scale(1.005)}
 .upload-zone .icon{font-size:48px;margin-bottom:12px;opacity:.6}
@@ -96,6 +149,15 @@ tr:hover{background:#e3f2fd}
 .t4dd-menu label input[type=checkbox]{margin:0;width:13px;height:13px}
 .t4dd-search{width:calc(100% - 8px);margin:4px;padding:3px 18px 3px 6px;border:1px solid #9fa8da;border-radius:3px;font-size:10px}
 .t5-srch-wrap{position:relative;display:block}.t5-clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:12px;color:#999;display:none}.t5-clr:hover{color:#333}
+/* Mobile table scroll wrapper */
+@media(max-width:768px){
+#tab1 .content>div,#tab2 .content>div,#tab3 .content>div,#tab4 .content>div,#tab5 .content>div,#tab6 .content>div{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#t3s2,#t6s2{max-height:360px!important}
+.opp-modal-overlay{padding:8px}
+.opp-modal{width:100%;max-width:100%;border-radius:4px}
+#oppModalBody{max-height:65vh}
+.filters-bar-inner{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;padding-bottom:2px}
+}
 .opp-cat-link{color:#1565c0;text-decoration:underline;cursor:pointer;font-weight:600}
 .opp-cat-link:hover{color:#0d47a1;background:#e3f2fd}
 .opp-modal-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:99998;align-items:flex-start;justify-content:center;padding:24px;box-sizing:border-box;overflow-y:auto}
@@ -136,7 +198,7 @@ tr:hover{background:#e3f2fd}
 <div id="gsheetTicker" style="background:#1a237e;color:#e8eaf6;font-size:10px;padding:4px 20px;display:flex;align-items:center;gap:6px;min-height:22px"><span style="color:#ffd54f">⟳</span> Connecting to Google Sheet…</div>
 <div id="uploadZone" class="upload-zone" onclick="document.getElementById('fileInput').click()"><div class="icon">📊</div><div class="uz-title">Upload Lulu Report</div><div class="desc">Drag & drop or click to upload the <strong>Lulu Report (.xlsx)</strong> file.</div><input type="file" id="fileInput" accept=".xlsx,.xls,.csv"></div>
 <div id="loadedBar" class="loaded-bar hidden"><div class="file-info"><span class="dot"></span><span id="loadedFileName">—</span><span style="color:#666;font-weight:400" id="loadedMeta"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="loadFromGoogleSheet()" style="background:#1565c0">↻ Refresh Data</button><button onclick="document.getElementById('fileInput2').click()">↻ Replace File</button><input type="file" id="fileInput2" accept=".xlsx,.xls,.csv" style="display:none"></div></div>
-<div id="tabBar" class="tab-bar hidden"><button class="tab-btn active" onclick="switchTab('tab1')">Category Analysis</button><button class="tab-btn" onclick="switchTab('tab2')">Best Performing Items</button><button class="tab-btn" onclick="switchTab('tab3')">Delicio Performance</button><button class="tab-btn" onclick="switchTab('tab4')">New Products Tracker</button><button class="tab-btn" onclick="switchTab('tab5')">Outlet Performance</button><button class="tab-btn" onclick="switchTab('tab6')">Competitor Analysis</button></div>
+<div id="tabBar" class="tab-bar hidden" style="overflow-x:auto;-webkit-overflow-scrolling:touch;display:flex;flex-wrap:nowrap"><button class="tab-btn active" onclick="switchTab('tab1')">Category Analysis</button><button class="tab-btn" onclick="switchTab('tab2')">Best Performing Items</button><button class="tab-btn" onclick="switchTab('tab3')">Delicio Performance</button><button class="tab-btn" onclick="switchTab('tab4')">New Products Tracker</button><button class="tab-btn" onclick="switchTab('tab5')">Outlet Performance</button><button class="tab-btn" onclick="switchTab('tab6')">Competitor Analysis</button></div>
 <div id="filtersBar" class="filters hidden">
 <div class="filter-group"><label>Current Year:</label><select id="curYear"></select></div>
 <div class="filter-group"><label>Comparison Year:</label><select id="cmpYear"></select></div>
