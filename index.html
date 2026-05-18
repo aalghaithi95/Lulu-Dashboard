@@ -772,19 +772,23 @@ var ins=[];ins.push('<b>Sales driver:</b> '+(totReg>totPro?'Regular dominates at
 // Right side: Growth/Decline value cards + Outlet Health
 var growthTot=0,declineTot=0;for(var i=0;i<growing.length;i++)growthTot+=growing[i].diff;for(var i=0;i<declining.length;i++)declineTot+=declining[i].diff;
 var insHtml='<div style="display:flex;gap:10px;align-items:stretch">';
-insHtml+='<div style="flex:1;padding:8px;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:4px;font-size:11px;line-height:2;text-align:center;display:flex;flex-direction:column;justify-content:center">'+ins.join('<br>')+'</div>';
-insHtml+='<div style="display:flex;gap:6px;padding:8px;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:4px;min-width:200px;align-items:center">';
-// Value metrics (left of outlet health)
-insHtml+='<div style="display:flex;flex-direction:column;gap:4px;flex:1">';
-insHtml+='<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:4px;padding:5px 8px;text-align:center"><div style="font-size:8px;color:#2e7d32;font-weight:600">Growth Value</div><div style="font-size:12px;font-weight:700;color:#2e7d32">+'+fN(growthTot)+'</div><div style="font-size:8px;color:#666">OMR</div></div>';
-insHtml+='<div style="background:#ffebee;border:1px solid #ef9a9a;border-radius:4px;padding:5px 8px;text-align:center"><div style="font-size:8px;color:#c62828;font-weight:600">Decline Value</div><div style="font-size:12px;font-weight:700;color:#c62828">'+fN(declineTot)+'</div><div style="font-size:8px;color:#666">OMR</div></div>';
-insHtml+='<div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:4px;padding:5px 8px;text-align:center"><div style="font-size:8px;color:#1565c0;font-weight:600">Net Total</div><div style="font-size:12px;font-weight:700;color:'+(growthTot+declineTot>=0?'#2e7d32':'#c62828')+'">'+fN(growthTot+declineTot)+'</div><div style="font-size:8px;color:#666">OMR</div></div>';
+// LEFT PANEL — equal flex:1, insights as single lines, left-aligned, vertically centered
+insHtml+='<div style="flex:1;padding:10px 14px;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:4px;font-size:11px;display:flex;flex-direction:column;justify-content:center;gap:4px">';
+for(var ii=0;ii<ins.length;ii++){insHtml+='<div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ins[ii]+'</div>';}
 insHtml+='</div>';
-// Outlet health (right side, vertical)
-insHtml+='<div style="display:flex;flex-direction:column;gap:4px;justify-content:center">';
-insHtml+='<div style="font-size:9px;font-weight:600;text-align:center">Outlet Health</div>';
-insHtml+='<div style="background:#2e7d32;color:#fff;border-radius:4px;padding:5px 8px;text-align:center;font-size:14px;font-weight:700">'+growing.length+'<div style="font-size:8px;font-weight:400">Growing</div></div>';
-insHtml+='<div style="background:#c62828;color:#fff;border-radius:4px;padding:5px 8px;text-align:center;font-size:14px;font-weight:700">'+declining.length+'<div style="font-size:8px;font-weight:400">Declining</div></div>';
+// RIGHT PANEL — equal flex:1, value cards + outlet health
+insHtml+='<div style="flex:1;display:flex;gap:6px;padding:8px;background:#f5f7fa;border:1px solid #e0e0e0;border-radius:4px;align-items:center">';
+// Value cards stacked
+insHtml+='<div style="display:flex;flex-direction:column;gap:4px;flex:1">';
+insHtml+='<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:4px;padding:4px 8px;text-align:center"><div style="font-size:8px;color:#2e7d32;font-weight:600">Growth Value</div><div style="font-size:12px;font-weight:700;color:#2e7d32">+'+fN(growthTot)+'</div><div style="font-size:8px;color:#666">OMR</div></div>';
+insHtml+='<div style="background:#ffebee;border:1px solid #ef9a9a;border-radius:4px;padding:4px 8px;text-align:center"><div style="font-size:8px;color:#c62828;font-weight:600">Decline Value</div><div style="font-size:12px;font-weight:700;color:#c62828">'+fN(declineTot)+'</div><div style="font-size:8px;color:#666">OMR</div></div>';
+insHtml+='<div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:4px;padding:4px 8px;text-align:center"><div style="font-size:8px;color:#1565c0;font-weight:600">Net Total</div><div style="font-size:12px;font-weight:700;color:'+(growthTot+declineTot>=0?'#2e7d32':'#c62828')+'">'+fN(growthTot+declineTot)+'</div><div style="font-size:8px;color:#666">OMR</div></div>';
+insHtml+='</div>';
+// Outlet health stacked
+insHtml+='<div style="display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center">';
+insHtml+='<div style="font-size:9px;font-weight:600;color:#283593">Outlet Health</div>';
+insHtml+='<div style="background:#2e7d32;color:#fff;border-radius:6px;padding:8px 12px;text-align:center;min-width:60px"><div style="font-size:18px;font-weight:700">'+growing.length+'</div><div style="font-size:8px;font-weight:400">Growing</div></div>';
+insHtml+='<div style="background:#c62828;color:#fff;border-radius:6px;padding:8px 12px;text-align:center;min-width:60px"><div style="font-size:18px;font-weight:700">'+declining.length+'</div><div style="font-size:8px;font-weight:400">Declining</div></div>';
 insHtml+='</div></div></div>';
 document.getElementById('t5Insights').innerHTML=insHtml;}
 function refreshT5Mx(){if(!ALL_YEARS.length)return;var yr=+(document.getElementById('t5MxYear')||document.getElementById('t5Year')).value;var ms=t5S.mxMo.size?Array.from(t5S.mxMo):getAM(yr);var stF=document.getElementById('t5MxType')?document.getElementById('t5MxType').value:'All';var D=t5q(yr,ms,stF,t5S.mxBr,'All',null);var isPC=t5S.mxMetric==='PC';var mk=isPC?'q':'s';var arr=[];for(var o in D)arr.push({o:o,s:D[o][mk],bc:D[o].byCat});arr.sort(function(a,b){return b.s-a.s;});arr=arr.slice(0,30);var mx='<table style="font-size:9px"><thead style="position:sticky;top:0;z-index:1"><tr><th style="text-align:left;font-size:9px">Outlet</th>';for(var ci=0;ci<CATS.length;ci++)mx+='<th style="font-size:10px">'+CATS[ci]+'</th>';mx+='<th style="font-size:9px">Total</th></tr></thead><tbody>';// Find top 3 categories by total
@@ -1096,14 +1100,14 @@ function openS2OtherModal(cat,rowEl){
 var modal=document.getElementById('s2OtherModal');var title=document.getElementById('s2OtherModalTitle');var body=document.getElementById('s2OtherModalBody');if(!modal)return;
 var ms=Array.from(selectedMonths).sort(function(a,b){return a-b;});
 var msLabel=ms.map(function(m){return MN[m];}).join('-');
-title.textContent='Other Brands — '+cat+' | '+msLabel+' '+curYear+' vs '+cmpYear;
+title.textContent='Other Brands — '+cat+' | '+curYear+' vs '+cmpYear;
 var items=[];try{items=JSON.parse(rowEl.getAttribute('data-s2items').replace(/&quot;/g,'"'));}catch(e){body.innerHTML='<p style="padding:20px;color:#999">Could not load brands.</p>';modal.classList.add('open');return;}
 items.sort(function(a,b){return b.cur-a.cur;});
-var h='<table><thead style="position:sticky;top:0;z-index:1"><tr><th>Brand</th><th>'+cmpYear+'</th><th>'+curYear+'</th><th>Chg</th><th>'+curYear+' Market Share</th><th>MS vs LY</th></tr></thead><tbody>';
+var h='<table style="font-size:13px"><thead style="position:sticky;top:0;z-index:1"><tr><th style="font-size:13px">Brand</th><th style="font-size:13px">'+cmpYear+'</th><th style="font-size:13px">'+curYear+'</th><th style="font-size:13px">Chg</th><th style="font-size:13px">'+curYear+' Market Share</th><th style="font-size:13px">MS vs LY</th></tr></thead><tbody>';
 var totCmp=0,totCur=0;
-for(var i=0;i<items.length;i++){var it=items[i];totCmp+=it.cmp;totCur+=it.cur;h+='<tr'+(it.brand==='DELICIO'?' class="delicio-row"':'')+'><td>'+it.brand+'</td><td>'+fN(it.cmp)+'</td><td>'+fN(it.cur)+'</td><td class="'+cl(it.chg)+'">'+fP(it.chg)+'</td><td>'+fP(it.msCur)+'</td><td class="'+cl(it.msVsLY)+'">'+fPP(it.msVsLY)+'</td></tr>';}
+for(var i=0;i<items.length;i++){var it=items[i];totCmp+=it.cmp;totCur+=it.cur;h+='<tr style="font-size:13px"'+(it.brand==='DELICIO'?' class="delicio-row"':'')+'><td>'+it.brand+'</td><td>'+fN(it.cmp)+'</td><td>'+fN(it.cur)+'</td><td class="'+cl(it.chg)+'">'+fP(it.chg)+'</td><td>'+fP(it.msCur)+'</td><td class="'+cl(it.msVsLY)+'">'+fPP(it.msVsLY)+'</td></tr>';}
 var gtChg=totCmp?(totCur-totCmp)/totCmp:0;
-h+='</tbody><tfoot><tr style="font-weight:700;background:#283593;color:#fff"><td>Total ('+items.length+' brands)</td><td>'+fN(totCmp)+'</td><td>'+fN(totCur)+'</td><td'+(gtChg<0?' style="color:#ff8a80"':(gtChg>0?' style="color:#a5d6a7"':''))+'>'+fP(gtChg)+'</td><td></td><td></td></tr></tfoot></table>';
+h+='</tbody><tfoot><tr style="font-weight:700;background:#283593;color:#fff;font-size:13px"><td>Total ('+items.length+' brands)</td><td>'+fN(totCmp)+'</td><td>'+fN(totCur)+'</td><td'+(gtChg<0?' style="color:#ff8a80"':(gtChg>0?' style="color:#a5d6a7"':''))+'>'+fP(gtChg)+'</td><td></td><td></td></tr></tfoot></table>';
 body.innerHTML=h;modal.classList.add('open');}
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeOppModal();closeOthersModal();closeS2OtherModal();}});
 function closeOthersModal(){var m=document.getElementById('othersModal');if(m)m.classList.remove('open');}
