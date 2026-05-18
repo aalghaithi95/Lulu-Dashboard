@@ -133,8 +133,9 @@ tr:hover{background:#e3f2fd}
 <div id="loadingOverlay" class="loading-overlay hidden"><div class="spinner"></div><div class="loading-text">Processing…</div></div>
 <div class="dashboard">
 <div class="header"><div><h1 id="dashTitle">Lulu Category Performance Dashboard</h1><div class="subtitle">Lulu Hypermarket — Oman | Category & Brand Performance</div></div><div style="text-align:right"><div style="font-size:10px;opacity:.7">DELICIO Brand Intelligence</div><div style="font-size:10px;opacity:.7" id="periodLabel">Upload data to begin</div></div></div>
+<div id="gsheetTicker" style="background:#1a237e;color:#e8eaf6;font-size:10px;padding:4px 20px;display:flex;align-items:center;gap:6px;min-height:22px"><span style="color:#ffd54f">⟳</span> Connecting to Google Sheet…</div>
 <div id="uploadZone" class="upload-zone" onclick="document.getElementById('fileInput').click()"><div class="icon">📊</div><div class="uz-title">Upload Lulu Report</div><div class="desc">Drag & drop or click to upload the <strong>Lulu Report (.xlsx)</strong> file.</div><input type="file" id="fileInput" accept=".xlsx,.xls,.csv"></div>
-<div id="loadedBar" class="loaded-bar hidden"><div class="file-info"><span class="dot"></span><span id="loadedFileName">—</span><span style="color:#666;font-weight:400" id="loadedMeta"></span></div><div><button onclick="document.getElementById('fileInput2').click()">↻ Replace</button><input type="file" id="fileInput2" accept=".xlsx,.xls,.csv" style="display:none"></div></div>
+<div id="loadedBar" class="loaded-bar hidden"><div class="file-info"><span class="dot"></span><span id="loadedFileName">—</span><span style="color:#666;font-weight:400" id="loadedMeta"></span></div><div style="display:flex;align-items:center;gap:8px"><button onclick="loadFromGoogleSheet()" style="background:#1565c0">↻ Refresh Data</button><button onclick="document.getElementById('fileInput2').click()">↻ Replace File</button><input type="file" id="fileInput2" accept=".xlsx,.xls,.csv" style="display:none"></div></div>
 <div id="tabBar" class="tab-bar hidden"><button class="tab-btn active" onclick="switchTab('tab1')">Category Analysis</button><button class="tab-btn" onclick="switchTab('tab2')">Best Performing Items</button><button class="tab-btn" onclick="switchTab('tab3')">Delicio Performance</button><button class="tab-btn" onclick="switchTab('tab4')">New Products Tracker</button><button class="tab-btn" onclick="switchTab('tab5')">Outlet Performance</button><button class="tab-btn" onclick="switchTab('tab6')">Competitor Analysis</button></div>
 <div id="filtersBar" class="filters hidden">
 <div class="filter-group"><label>Current Year:</label><select id="curYear"></select></div>
@@ -981,5 +982,60 @@ modal.classList.add('open');
 // Close modal on ESC key
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeOppModal();}});
 
+/* ═══ GOOGLE SHEET AUTO-LOAD ═══ */
+var GSHEET_ID='1FDDMqhLrDRaqB2vG1qLA5CpxP513fMK27PmtX1ma3Oo';
+var GSHEET_GID='510920116';
+var gsheetLastLoaded=null;
+var gsheetAutoRefreshTimer=null;
+function gsheetCsvUrl(){return 'https://docs.google.com/spreadsheets/d/'+GSHEET_ID+'/export?format=csv&gid='+GSHEET_GID+'&t='+Date.now();}
+function updateTicker(state,extra){
+var tk=document.getElementById('gsheetTicker');if(!tk)return;
+var states={
+connecting:'<span style="color:#ffd54f">⟳</span> Connecting to Google Sheet…',
+fetching:'<span style="color:#ffd54f">⟳</span> Fetching latest data… '+(extra||''),
+processing:'<span style="color:#ffd54f">⟳</span> Processing data…',
+live:'<span style="color:#69f0ae">●</span> Connected to Google Sheet &nbsp;·&nbsp; Last refreshed: '+(extra||'just now'),
+error:'<span style="color:#ff5252">✕</span> Google Sheet unavailable &nbsp;·&nbsp; '+(extra||''),
+};
+tk.innerHTML=states[state]||extra||'';}
+function timeSince(date){
+var sec=Math.floor((Date.now()-date)/1000);
+if(sec<60)return 'just now';
+if(sec<3600)return Math.floor(sec/60)+'m ago';
+return Math.floor(sec/3600)+'h ago';}
+function startTickerClock(){
+if(gsheetAutoRefreshTimer)clearInterval(gsheetAutoRefreshTimer);
+gsheetAutoRefreshTimer=setInterval(function(){
+if(gsheetLastLoaded)updateTicker('live',timeSince(gsheetLastLoaded));
+},30000);}
+function loadFromGoogleSheet(){
+var ov=document.getElementById('loadingOverlay');
+ov.classList.remove('hidden');
+updateTicker('connecting');
+fetch(gsheetCsvUrl(),{method:'GET',credentials:'omit',redirect:'follow'})
+.then(function(resp){
+if(!resp.ok)throw new Error('HTTP '+resp.status);
+updateTicker('fetching','(large file — please wait)');
+return resp.text();
+}).then(function(csv){
+if(!csv||csv.length<100)throw new Error('Empty response');
+if(csv.trim().substring(0,9).toLowerCase().indexOf('<!doctype')>=0||csv.trim().substring(0,6).toLowerCase()==='<html>')
+throw new Error('Sheet is not publicly accessible');
+updateTicker('processing');
+setTimeout(function(){
+try{
+var fileObj=new File([csv],'Google-Sheet-Live.csv',{type:'text/csv',lastModified:Date.now()});
+processFile(fileObj);
+gsheetLastLoaded=Date.now();
+setTimeout(function(){updateTicker('live','just now');startTickerClock();},3000);
+}catch(e){
+ov.classList.add('hidden');
+updateTicker('error',e.message);
+}},50);
+}).catch(function(err){
+ov.classList.add('hidden');
+updateTicker('error',err.message||String(err));
+});}
 setupFileHandlers();
+setTimeout(loadFromGoogleSheet,400);
 </script></body></html>
