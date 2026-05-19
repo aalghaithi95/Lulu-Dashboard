@@ -15,56 +15,115 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5;
 .header .subtitle{font-size:11px;opacity:.85}
 /* ── MOBILE RESPONSIVE ── */
 @media(max-width:768px){
-body{padding:0;font-size:12px}
-.dashboard{border-radius:0;box-shadow:none}
+/* ── BODY & CONTAINER ── */
+body{padding:0;font-size:12px;overflow-x:hidden}
+.dashboard{border-radius:0;box-shadow:none;overflow-x:hidden}
+/* ── HEADER ── */
 .header{padding:10px 14px;flex-wrap:wrap;gap:4px}
-.header h1{font-size:14px}
+.header h1{font-size:13px}
 .header .subtitle{font-size:10px}
 .header>div:last-child{display:none}
 #gsheetTicker{font-size:10px;padding:4px 12px}
+/* ── LOADED BAR ── */
 .loaded-bar{flex-wrap:wrap;gap:6px;padding:6px 12px;font-size:10px}
 .loaded-bar .file-info{width:100%;flex-wrap:wrap}
+/* ── TAB BAR ── */
 .tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;white-space:nowrap;display:flex;scrollbar-width:none}
 .tab-bar::-webkit-scrollbar{display:none}
-.tab-btn{font-size:10px;padding:8px 12px;min-width:fit-content;flex-shrink:0;white-space:nowrap}
-.filters{padding:8px 10px;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none}
+.tab-btn{font-size:10px;padding:8px 10px;min-width:fit-content;flex-shrink:0;white-space:nowrap}
+/* ── FILTERS ── */
+.filters{padding:6px 8px;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none}
 .filters::-webkit-scrollbar{display:none}
 .filter-group{flex-shrink:0}
 .filter-group label{font-size:9px}
-.filter-group select{font-size:11px;padding:4px 6px;min-width:70px}
-.sub-filter-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none;padding:6px 10px}
+.filter-group select{font-size:11px;padding:4px 6px;min-width:70px;min-height:30px}
+.sub-filter-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none;padding:5px 8px}
 .sub-filter-bar::-webkit-scrollbar{display:none}
-.content{padding:6px 10px}
-.section-title{font-size:11px;padding:4px 8px;display:flex;flex-wrap:wrap;gap:6px}
+/* ── CONTENT & SECTIONS ── */
+.content{padding:6px 8px;max-width:100%;box-sizing:border-box;overflow-x:hidden}
+.section-title{font-size:11px;padding:4px 8px;display:flex;flex-wrap:wrap;gap:4px}
+/* ── BUTTONS ── */
 .item-type-btns{flex-wrap:wrap;gap:3px}
 .item-type-btn{font-size:10px;padding:3px 8px;min-height:28px}
+.btn-action{font-size:10px;padding:4px 8px;min-height:28px}
+/* ── KPI CARDS ── */
 .kpi-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px}
 .kpi-card{padding:8px 10px}
 .kpi-label{font-size:9px}
 .kpi-value{font-size:16px}
-table{font-size:10px}
-th,td{padding:4px 5px;font-size:10px}
-.t4dd-menu{max-height:250px;z-index:9999}
-.t4dd-btn{font-size:10px;padding:4px 8px;min-height:28px}
-.month-btn{font-size:10px;padding:4px 8px;min-height:28px;min-width:36px}
-.upload-zone{margin:12px;padding:30px 20px}
-.uz-title{font-size:16px}
-.desc{font-size:11px}
+/* ── ALL TABLES: scroll horizontally inside their wrapper, never push page wider ── */
+table{font-size:10px;min-width:0}
+th,td{padding:3px 5px;font-size:9px;white-space:nowrap}
+/* Table containers — each gets its own horizontal scroll */
+#tab1 table,#tab2 table,#tab3 table,#tab4 table,#tab5 table,#tab6 table{min-width:auto}
+/* Wrapping containers: horizontal scroll per section */
+#tab1 .cat-table-wrapper,
+#tab1 .section2-grid .cat-table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;display:block;max-width:100%}
+#tab2 #itemGrid,#tab2 #itemGrid>div{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t3s1,#t3s2{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t3s2{max-height:320px!important}
+#t4Brands,#t4Products{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t4TrendChart{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t5Ranking{flex-direction:column!important}
+#t5Ranking>div{width:100%!important;flex:none!important}
+#t5Ranking>div table{min-width:520px}
+#t5Ranking>div div[style*="overflow-y"]{overflow-x:auto!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}
+#t5Mx{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t5Op{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t5Opp{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t5Insights>div{flex-direction:column!important}
+#t5Insights>div>div{width:100%!important;flex:none!important;min-width:0!important}
+#t6s1{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#t6s2{overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-width:100%;max-height:320px!important}
+/* Section 2 grid: stack vertically on mobile */
+.section2-grid{grid-template-columns:1fr!important;gap:8px}
+/* Insight grids */
 .insight-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px}
 .insight-card{padding:8px}
-.opp-modal{padding:10px 12px;margin:8px}
-.opp-modal-title{font-size:11px}
-#t5TrChart{height:200px!important}
-.section2-grid{grid-template-columns:1fr!important}
-.btn-action{font-size:10px;padding:4px 8px;min-height:28px}
-select{min-height:28px;font-size:11px}
+/* ── DROPDOWNS ── */
+.t4dd-menu{max-height:220px;z-index:9999;position:fixed!important;min-width:180px}
+.t4dd-btn{font-size:10px;padding:4px 8px;min-height:28px}
+/* ── MONTH BUTTONS ── */
+.month-btn{font-size:10px;padding:4px 8px;min-height:28px;min-width:36px}
 .months-container{flex-wrap:wrap;gap:3px}
+/* ── UPLOAD ZONE ── */
+.upload-zone{margin:12px;padding:24px 16px}
+.uz-title{font-size:15px}
+.desc{font-size:11px}
+/* ── MODALS ── */
+.opp-modal-overlay{padding:6px}
+.opp-modal{width:100%;max-width:100%;border-radius:4px;padding:10px 12px}
+.opp-modal-title{font-size:11px}
+#oppModalBody,#othersModalBody,#s2OtherModalBody{max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch}
+/* ── CHART ── */
+#t5TrChart{height:180px!important}
+/* ── SELECTS ── */
+select{min-height:28px;font-size:11px}
+/* ── SIDE-BY-SIDE FLEX LAYOUTS: stack on mobile ── */
+/* Tab 1 Section 1 side-by-side */
+#tab1 .item-side-by-side{flex-direction:column!important}
+/* Tab 3 Section 1 pie + table */
+#tab1 .delicio-section1,#tab3 .delicio-section1,[id^="t3s1"]{flex-direction:column!important}
+/* Tab 5 Outlet × Category Mix area */
+[id*="Mx"]{max-width:100%}
+/* Auto insight side panels */
+#t5Insights [style*="display:flex"]{flex-wrap:wrap}
 }
+/* ── EXTRA SMALL SCREENS ── */
 @media(max-width:480px){
 .kpi-grid{grid-template-columns:repeat(2,1fr)!important}
 .insight-grid{grid-template-columns:1fr!important}
-.header h1{font-size:12px}
-.tab-btn{font-size:9px;padding:7px 10px}
+.header h1{font-size:11px}
+.tab-btn{font-size:9px;padding:6px 8px}
+th,td{padding:2px 4px;font-size:9px}
+.section-title{font-size:10px}
+}
+/* ── SECOND MOBILE BLOCK (table containers per tab) ── */
+@media(max-width:768px){
+#tab1 .content>div,#tab2 .content>div,#tab3 .content>div,#tab4 .content>div,#tab5 .content>div,#tab6 .content>div{max-width:100%;box-sizing:border-box}
+.opp-modal-overlay{padding:6px}
+.opp-modal{width:100%;max-width:100%;border-radius:4px}
+#oppModalBody{max-height:65vh}
 }
 .upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;border:3px dashed #9fa8da;border-radius:12px;margin:30px;background:#f5f7ff;cursor:pointer;transition:all .2s}
 .upload-zone:hover,.upload-zone.dragover{border-color:#283593;background:#e8eaf6;transform:scale(1.005)}
@@ -150,14 +209,6 @@ tr:hover{background:#e3f2fd}
 .t4dd-search{width:calc(100% - 8px);margin:4px;padding:3px 18px 3px 6px;border:1px solid #9fa8da;border-radius:3px;font-size:10px}
 .t5-srch-wrap{position:relative;display:block}.t5-clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:12px;color:#999;display:none}.t5-clr:hover{color:#333}
 /* Mobile table scroll wrapper */
-@media(max-width:768px){
-#tab1 .content>div,#tab2 .content>div,#tab3 .content>div,#tab4 .content>div,#tab5 .content>div,#tab6 .content>div{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-#t3s2,#t6s2{max-height:360px!important}
-.opp-modal-overlay{padding:8px}
-.opp-modal{width:100%;max-width:100%;border-radius:4px}
-#oppModalBody{max-height:65vh}
-.filters-bar-inner{display:flex;flex-wrap:nowrap;overflow-x:auto;gap:8px;padding-bottom:2px}
-}
 .opp-cat-link{color:#1565c0;text-decoration:underline;cursor:pointer;font-weight:600}
 .opp-cat-link:hover{color:#0d47a1;background:#e3f2fd}
 .opp-modal-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.55);z-index:99998;align-items:flex-start;justify-content:center;padding:24px;box-sizing:border-box;overflow-y:auto}
@@ -212,20 +263,22 @@ tr:hover{background:#e3f2fd}
 </div></div>
 <div id="tab1" class="tab-content active"><div class="content hidden" id="tab1Content">
 <div class="section-title" style="display:flex;align-items:center;gap:12px">Section 1: Overall Category Analysis & Delicio Analysis
+<button onclick="printSection('Category Analysis — Section 1','tab1S1Print')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px">🖨 Print</button>
 <div class="item-type-btns" id="t1MetricBtns" style="margin-left:auto"><div class="item-type-btn active" data-val="Value" onclick="setT1Metric('Value',this)">Value</div><div class="item-type-btn" data-val="PC" onclick="setT1Metric('PC',this)">PC</div></div>
 </div>
-<div class="section1-wrapper"><div class="section1-overall"><table id="tblOverall"></table></div><div class="section1-delicio"><table id="tblDelicio"></table><div id="delicioGain"></div></div></div>
+<div id="tab1S1Print"><div class="section1-wrapper"><div class="section1-overall"><table id="tblOverall"></table></div><div class="section1-delicio"><table id="tblDelicio"></table><div id="delicioGain"></div></div></div></div>
 <div class="section-title" style="margin-top:8px">Section 2: Brand Analysis by Category</div>
 <div class="section2-grid" id="section2Grid"></div>
 </div></div>
 <div id="tab2" class="tab-content"><div class="content"><div class="section-title" id="itemSectionTitle">Best Performing SKUs</div><div id="itemGrid"></div></div></div>
 <div id="tab3" class="tab-content"><div class="content">
 <div class="section-title" style="display:flex;align-items:center;gap:12px">Section 1: Delicio Categories Performance
+<button onclick="printSection('Delicio Categories Performance','tab3S1Print')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px">🖨 Print</button>
 <div class="item-type-btns" id="t3s1TypeBtns" style="margin-left:auto"><div class="item-type-btn active" data-val="All" onclick="setT3S1Type('All',this)">All</div><div class="item-type-btn" data-val="Regular" onclick="setT3S1Type('Regular',this)">Regular</div><div class="item-type-btn" data-val="Promotion" onclick="setT3S1Type('Promotion',this)">Promotion</div></div>
 </div>
-<div style="display:flex;gap:12px;align-items:flex-start"><div style="flex:1.3" id="t3s1"></div><div style="flex:0.7;min-width:280px" id="t3s1Chart"></div></div>
+<div id="tab3S1Print"><div style="display:flex;gap:12px;align-items:flex-start"><div style="flex:1.3" id="t3s1"></div><div style="flex:0.7;min-width:280px" id="t3s1Chart"></div></div></div>
 <div id="t3s1Insight"></div>
-<div class="section-title" style="margin-top:10px">Section 2: Delicio Products</div>
+<div class="section-title" style="margin-top:10px;display:flex;align-items:center;gap:12px">Section 2: Delicio Products<button onclick="printSection('Delicio Products','t3s2')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px">🖨 Print</button></div>
 <div class="sub-filter-bar">
 <div class="filter-group"><label>Category:</label><div class="t4dd-wrap"><button class="t4dd-btn" id="t3s2CatBtn" onclick="t4Toggle('t3s2CatDrop')">All ▾</button><div class="t4dd-menu" id="t3s2CatDrop"></div></div></div>
 <div class="filter-group"><label>Type:</label><div class="item-type-btns" id="t3s2TypeBtns"><div class="item-type-btn active" data-val="All" onclick="setT3S2Type('All',this)">All</div><div class="item-type-btn" data-val="Regular" onclick="setT3S2Type('Regular',this)">Regular</div><div class="item-type-btn" data-val="Promotion" onclick="setT3S2Type('Promotion',this)">Promotion</div></div></div>
@@ -246,9 +299,9 @@ tr:hover{background:#e3f2fd}
 <div class="filter-group"><button onclick="resetT4Filters()" style="padding:4px 12px;border:1px solid #283593;border-radius:3px;background:#283593;color:#fff;cursor:pointer;font-size:10px;font-weight:600">Reset Filters</button></div>
 </div>
 <div id="t4Summary"></div>
-<div class="section-title" style="margin-top:8px">Brand Tracking</div>
+<div class="section-title" style="margin-top:8px;display:flex;align-items:center;gap:8px">Brand Tracking<button onclick="printSection('Brand Tracking','t4Brands')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px">🖨 Print</button></div>
 <div id="t4Brands" style="max-height:432px;overflow-y:auto"></div>
-<div class="section-title" style="margin-top:8px">New Product Sales Performance</div>
+<div class="section-title" style="margin-top:8px;display:flex;align-items:center;gap:8px">New Product Sales Performance<button onclick="printSection('New Product Sales Performance','t4Products')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px">🖨 Print</button></div>
 <div id="t4Products" style="max-height:432px;overflow-y:auto"></div>
 <div class="section-title" style="margin-top:12px">New Product Monthly Sales Trend</div>
 <div class="sub-filter-bar" id="t4TrendFilters">
@@ -321,11 +374,12 @@ tr:hover{background:#e3f2fd}
 </div></div>
 <div id="tab6" class="tab-content"><div class="content">
 <div class="section-title" style="display:flex;align-items:center;gap:12px">Section 1: Brand Categories Performance
+<button onclick="printSection('Brand Categories Performance','t6s1')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px">🖨 Print</button>
 <div class="item-type-btns" id="t6s1MetricBtns" style="margin-left:auto"><div class="item-type-btn active" data-val="Value" onclick="setT6S1Metric('Value',this)">Value</div><div class="item-type-btn" data-val="PC" onclick="setT6S1Metric('PC',this)">PC</div></div>
 <div class="item-type-btns" id="t6s1TypeBtns"><div class="item-type-btn active" data-val="All" onclick="setT6S1Type('All',this)">All</div><div class="item-type-btn" data-val="Regular" onclick="setT6S1Type('Regular',this)">Regular</div><div class="item-type-btn" data-val="Promotion" onclick="setT6S1Type('Promotion',this)">Promotion</div></div>
 </div>
 <div id="t6s1" style="overflow-x:auto"></div>
-<div class="section-title" style="margin-top:10px;display:flex;align-items:center;gap:12px">Section 2: Brand Products Performance</div>
+<div class="section-title" style="margin-top:10px;display:flex;align-items:center;gap:12px">Section 2: Brand Products Performance<button onclick="printSection('Brand Products Performance','t6s2')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px">🖨 Print</button></div>
 <div class="sub-filter-bar">
 <div class="filter-group"><label>Category:</label><div class="t4dd-wrap"><button class="t4dd-btn" id="t6s2CatBtn" onclick="t4Toggle('t6s2CatDrop')">All ▾</button><div class="t4dd-menu" id="t6s2CatDrop"></div></div></div>
 <div class="filter-group"><label>Type:</label><div class="item-type-btns" id="t6s2TypeBtns"><div class="item-type-btn active" data-val="All" onclick="setT6S2Type('All',this)">All</div><div class="item-type-btn" data-val="Regular" onclick="setT6S2Type('Regular',this)">Regular</div><div class="item-type-btn" data-val="Promotion" onclick="setT6S2Type('Promotion',this)">Promotion</div></div></div>
@@ -338,7 +392,7 @@ tr:hover{background:#e3f2fd}
 </div>
 <div id="oppModal" class="opp-modal-overlay" onclick="if(event.target===this)closeOppModal()">
 <div class="opp-modal">
-<div class="opp-modal-header"><div class="opp-modal-title" id="oppModalTitle">Product Details</div><button class="opp-modal-close" onclick="closeOppModal()">✕ Close</button></div>
+<div class="opp-modal-header"><div class="opp-modal-title" id="oppModalTitle">Product Details</div><button onclick="printSection(document.getElementById('oppModalTitle').textContent,'oppModalBody')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;margin-left:auto">🖨 Print</button><button class="opp-modal-close" onclick="closeOppModal()">✕ Close</button></div>
 <div id="oppModalBody" style="overflow:auto;max-height:75vh"></div>
 </div>
 </div>
@@ -384,6 +438,8 @@ var ALL_OUTLETS=[]; // cached outlet list
 
 /* ═══ HELPERS ═══ */
 function fN(v){return v===0?'-':Math.round(v).toLocaleString('en-US');}
+function printSection(title,elId){var el=document.getElementById(elId);if(!el){alert('Nothing to print yet.');return;}var w=window.open('','_blank','width=900,height=700');var css='<style>*{box-sizing:border-box}body{font-family:Segoe UI,Tahoma,sans-serif;padding:16px;color:#1a1a2e}h2{color:#283593;font-size:14px;margin-bottom:10px;border-bottom:2px solid #283593;padding-bottom:6px}table{border-collapse:collapse!important;width:100%;font-size:10px;margin-bottom:12px}th{background:#37474f!important;color:#fff!important;padding:5px 7px!important;text-align:center!important;font-size:10px!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.3px!important;border:1px solid #546e7a!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}td{padding:4px 7px!important;border:1px solid #cfd8dc!important;text-align:center}thead{display:table-header-group}thead tr th{border:1px solid #546e7a!important}.delicio-row td{background:#e8eaf6!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.total-row td{background:#283593!important;color:#fff!important;font-weight:700!important;border:1px solid #1a237e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.cat-header{background:#283593!important;color:#fff!important;font-weight:700!important;font-size:12px!important;padding:5px 8px!important;text-align:left!important;border:1px solid #1a237e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pos{color:#2e7d32!important;font-weight:600}.neg{color:#c62828!important;font-weight:600}a{color:inherit!important;text-decoration:none!important}.section-title{display:none}.sub-filter-bar{display:none}.item-type-btns{display:none}.opp-cat-link{color:inherit!important;text-decoration:none!important;font-weight:normal!important;cursor:default!important}@media print{@page{margin:10mm;size:A4 landscape}body{padding:8px}h2{font-size:12px}}</style>';w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title>'+css+'</head><body><h2>'+title+'</h2>'+el.innerHTML+'</body></html>');w.document.close();w.onload=function(){w.focus();w.print();};}
+function printBtn(title,elId){return '<button onclick="printSection(\''+title+'\',\''+elId+'\')" style="padding:3px 10px;border:1px solid #283593;border-radius:3px;background:#fff;color:#283593;cursor:pointer;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px"><span>🖨</span> Print</button>';}
 function fP(v){return(!isFinite(v)||isNaN(v))?'-':(v*100).toFixed(1)+'%';}
 function fPP(v){return(!isFinite(v)||isNaN(v))?'-':(v*100).toFixed(1)+' pp';}
 function cl(v){return(!isFinite(v)||isNaN(v)||v===0)?'':v<0?'neg':'pos';}
