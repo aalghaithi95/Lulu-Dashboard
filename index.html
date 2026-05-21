@@ -638,9 +638,20 @@ av.forEach(function(m){
   l.appendChild(cb);
   l.appendChild(document.createTextNode(MN[m]));
   cb.onchange=function(){
+    // Check live state at click time — not stale closure
+    var av2=getAM(curYear);
+    var currentlyAll=acb.checked||(selectedMonths.size>0&&selectedMonths.size===av2.length);
     acb.checked=false;
     if(this.checked){
-      selectedMonths.add(m);
+      if(currentlyAll){
+        // Override All — switch to ONLY this month
+        selectedMonths=new Set([m]);
+        el.querySelectorAll('input[data-month]').forEach(function(c){
+          if(+c.getAttribute('data-month')!==m)c.checked=false;
+        });
+      }else{
+        selectedMonths.add(m);
+      }
     }else{
       selectedMonths.delete(m);
       if(!selectedMonths.size){
@@ -649,14 +660,13 @@ av.forEach(function(m){
         return;
       }
     }
-    // Check if all months now selected — mark All
-    if(selectedMonths.size===av.length){
-      selectedMonths=new Set(av);
+    if(selectedMonths.size===av2.length){
+      selectedMonths=new Set(av2);
       acb.checked=true;
       el.querySelectorAll('input[data-month]').forEach(function(c){c.checked=false;});
       document.getElementById('mainMonthBtn').textContent='All ▾';
     }else{
-      document.getElementById('mainMonthBtn').textContent=t4Lbl(selectedMonths,'All',av.length);
+      document.getElementById('mainMonthBtn').textContent=t4Lbl(selectedMonths,'All',av2.length);
     }
     refreshActive();
   };
@@ -815,11 +825,17 @@ function t5BrRadio(cid,btnId,cur,setter,cb,mode){var el=document.getElementById(
 function t5BrMulti(cid,btnId,sel,cb,max){var el=document.getElementById(cid);el.innerHTML='';var avB={};for(var y in OIDX)for(var m in OIDX[y])for(var o in OIDX[y][m]){if(o==='_wil')continue;for(var cat in OIDX[y][m][o]){if(cat==='_wil')continue;for(var bk in OIDX[y][m][o][cat]){var dd=OIDX[y][m][o][cat][bk];if(dd.brand)avB[dd.brand]=1;};}}var sortedB=Object.keys(avB).sort();var selFirst=sortedB.filter(function(b){return sel.has(b);}).concat(sortedB.filter(function(b){return !sel.has(b);}));selFirst.forEach(function(b){var l=document.createElement('label');var c=document.createElement('input');c.type='checkbox';c.checked=sel.has(b);if(sel.has(b))l.style.background='#e3f2fd';l.appendChild(c);l.appendChild(document.createTextNode(b));c.onchange=function(){if(this.checked){if(max&&sel.size>=max){this.checked=false;return;}sel.add(b);}else sel.delete(b);document.getElementById(btnId).textContent=sel.size?sel.size+' brands ▾':'All ▾';cb();};el.appendChild(l);});}
 function t5OutRadio(cid,btnId,cur,setter,cb){var el=document.getElementById(cid);el.innerHTML='';var al=document.createElement('label');al.style.fontWeight='600';var ar=document.createElement('input');ar.type='radio';ar.name=cid;ar.checked=cur==='All';al.appendChild(ar);al.appendChild(document.createTextNode('All'));ar.onchange=function(){setter('All');document.getElementById(btnId).textContent='All ▾';cb();};el.appendChild(al);ALL_OUTLETS.forEach(function(o){var l=document.createElement('label');var r=document.createElement('input');r.type='radio';r.name=cid;r.checked=o===cur;l.appendChild(r);l.appendChild(document.createTextNode(o));r.onchange=function(){setter(o);document.getElementById(btnId).textContent=o.substring(0,18)+' ▾';cb();};el.appendChild(l);});}
 function t5q(yr,ms,stF,brF,catF,outF){var R={};if(!OIDX[yr])return R;for(var mi=0;mi<ms.length;mi++){var m=ms[mi];if(!OIDX[yr][m])continue;for(var o in OIDX[yr][m]){if(o==='_wil')continue;if(outF&&outF!=='All'&&o!==outF)continue;var od=OIDX[yr][m][o];for(var cat in od){if(cat==='_wil')continue;if(catF&&catF!=='All'&&cat!==catF)continue;for(var bstK in od[cat]){var d=od[cat][bstK];if(!d.brand)continue;if(brF&&brF!=='All'&&d.brand!==brF)continue;if(stF!=='All'&&d.st!==stF)continue;if(!R[o])R[o]={wil:od._wil||'',s:0,q:0,reg:0,promo:0,byCat:{}};if(!R[o].byCat[cat])R[o].byCat[cat]={s:0,q:0,reg:0,promo:0};R[o].s+=d.sales;R[o].q+=d.qty;R[o].byCat[cat].s+=d.sales;R[o].byCat[cat].q+=d.qty;if(d.st==='Regular'){R[o].reg+=d.sales;R[o].byCat[cat].reg+=d.sales;}else{R[o].promo+=d.sales;R[o].byCat[cat].promo+=d.sales;}}}}}return R;}
-function initT5(){var yrs=ALL_YEARS;var s=document.getElementById('t5Year');s.innerHTML='';yrs.forEach(function(y){s.innerHTML+='<option value="'+y+'">'+y+'</option>';});s.value=yrs[yrs.length-1];
+function initT5(){var yrs=ALL_YEARS;var s=document.getElementById('t5Year');if(!s)return;s.innerHTML='';yrs.forEach(function(y){s.innerHTML+='<option value="'+y+'">'+y+'</option>';});s.value=yrs[yrs.length-1];
 ['t5MxYear','t5TrYear'].forEach(function(id){var el=document.getElementById(id);if(el){el.innerHTML='';yrs.forEach(function(y){el.innerHTML+='<option value="'+y+'">'+y+'</option>';});el.value=yrs[yrs.length-1];}});
 // Op Year filter: exclude 2024 (used internally as comparison year only) and require >= 2025
 var opYrs=yrs.filter(function(y){return y>=2025;});
-var opYearEl=document.getElementById('t5OpYear');if(opYearEl){opYearEl.innerHTML='';opYrs.forEach(function(y){opYearEl.innerHTML+='<option value="'+y+'">'+y+'</option>';});opYearEl.value=opYrs.length?opYrs[opYrs.length-1]:yrs[yrs.length-1];}var avC={};for(var y in OIDX)for(var m in OIDX[y])for(var o in OIDX[y][m]){if(o==='_wil')continue;for(var cat in OIDX[y][m][o])if(cat!=='_wil')avC[cat]=1;};['t5Cat','t5TrCat','t5OpCat'].forEach(function(id){var s2=document.getElementById(id);s2.innerHTML='<option value="All">All</option>';Object.keys(avC).sort().forEach(function(c){s2.innerHTML+='<option value="'+c+'">'+c+'</option>';});});t5MoChk('t5MoDrop',t5S.mo,'t5MoBtn',refreshT5Main);rebuildMainFilters();t5MoChk('t5MxMoDrop',t5S.mxMo,'t5MxMoBtn',refreshT5Mx);t5BrRadio('t5MxBrList','t5MxBrBtn',t5S.mxBr,function(v){t5S.mxBr=v;},refreshT5Mx,'all');t5MoChk('t5TrMoDrop',t5S.trMo,'t5TrMoBtn',function(){rebuildTrBrands();refreshT5Tr();});rebuildTrBrands();t5OpMoChk();rebuildOpFilters();}
+var opYearEl=document.getElementById('t5OpYear');if(opYearEl){opYearEl.innerHTML='';opYrs.forEach(function(y){opYearEl.innerHTML+='<option value="'+y+'">'+y+'</option>';});opYearEl.value=opYrs.length?opYrs[opYrs.length-1]:yrs[yrs.length-1];}var avC={};for(var y in OIDX)for(var m in OIDX[y])for(var o in OIDX[y][m]){if(o==='_wil')continue;for(var cat in OIDX[y][m][o])if(cat!=='_wil')avC[cat]=1;};['t5Cat','t5TrCat','t5OpCat'].forEach(function(id){var s2=document.getElementById(id);if(!s2)return;s2.innerHTML='<option value="All">All</option>';Object.keys(avC).sort().forEach(function(c){s2.innerHTML+='<option value="'+c+'">'+c+'</option>';});});
+if(document.getElementById('t5MoDrop'))t5MoChk('t5MoDrop',t5S.mo,'t5MoBtn',refreshT5Main);
+rebuildMainFilters();
+if(document.getElementById('t5MxMoDrop'))t5MoChk('t5MxMoDrop',t5S.mxMo,'t5MxMoBtn',refreshT5Mx);
+if(document.getElementById('t5MxBrList'))t5BrRadio('t5MxBrList','t5MxBrBtn',t5S.mxBr,function(v){t5S.mxBr=v;},refreshT5Mx,'all');
+if(document.getElementById('t5TrMoDrop'))t5MoChk('t5TrMoDrop',t5S.trMo,'t5TrMoBtn',function(){rebuildTrBrands();refreshT5Tr();});
+rebuildTrBrands();t5OpMoChk();rebuildOpFilters();}
 function resetT5Main(){t5S.mo.clear();t5S.br='All';document.getElementById('t5Cat').value='All';document.getElementById('t5Type').value='All';document.getElementById('t5BrBtn').textContent='All ▾';document.getElementById('t5MoBtn').textContent='All ▾';t5MoChk('t5MoDrop',t5S.mo,'t5MoBtn',refreshT5Main);rebuildMainFilters();refreshT5Main();}
 function resetT5Mx(){t5S.mxMo.clear();t5S.mxBr='All';document.getElementById('t5MxType').value='All';var yEl=document.getElementById('t5MxYear');if(yEl)yEl.value=ALL_YEARS[ALL_YEARS.length-1];document.getElementById('t5MxMoBtn').textContent='All ▾';document.getElementById('t5MxBrBtn').textContent='All ▾';t5MoChk('t5MxMoDrop',t5S.mxMo,'t5MxMoBtn',refreshT5Mx);t5BrRadio('t5MxBrList','t5MxBrBtn',t5S.mxBr,function(v){t5S.mxBr=v;},refreshT5Mx,'all');refreshT5Mx();}
 function resetT5Tr(){t5S.trMo.clear();t5S.trBr.clear();document.getElementById('t5TrCat').value='All';document.getElementById('t5TrType').value='All';var yEl=document.getElementById('t5TrYear');if(yEl)yEl.value=ALL_YEARS[ALL_YEARS.length-1];document.getElementById('t5TrBrBtn').textContent='All ▾';rebuildTrBrands();refreshT5Tr();}
