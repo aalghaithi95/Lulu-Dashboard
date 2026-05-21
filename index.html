@@ -595,20 +595,82 @@ function setT3S1Type(v){t3s1Type=v;document.querySelectorAll('#t3s1TypeBtns .ite
 function setT3S2Type(v){t3s2Type=v;document.querySelectorAll('#t3s2TypeBtns .item-type-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-val')===v);});refreshT3S2();}
 function setT3S2Active(v){t3s2Active=v;document.querySelectorAll('#t3s2ActiveBtns .item-type-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-val')===v);});refreshT3S2();}
 function setT3S2DG(v){t3s2DG=v;document.querySelectorAll('#t3s2DGBtns .item-type-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-val')===v);});refreshT3S2();}
-function initFilters(){var cs=document.getElementById('curYear'),cm=document.getElementById('cmpYear');cs.innerHTML='';cm.innerHTML='';ALL_YEARS.forEach(function(y){cs.innerHTML+='<option value="'+y+'"'+(y===curYear?' selected':'')+'>'+y+'</option>';cm.innerHTML+='<option value="'+y+'"'+(y===cmpYear?' selected':'')+'>'+y+'</option>';});cs.onchange=function(){curYear=+cs.value;selectedMonths=new Set(getAM(curYear));buildMonthSelect();document.getElementById('mainMonthBtn').textContent='All ▾';refreshActive();};cm.onchange=function(){cmpYear=+cm.value;refreshActive();};updateMB();}
+function initFilters(){var cs=document.getElementById('curYear'),cm=document.getElementById('cmpYear');cs.innerHTML='';cm.innerHTML='';ALL_YEARS.forEach(function(y){cs.innerHTML+='<option value="'+y+'"'+(y===curYear?' selected':'')+'>'+y+'</option>';cm.innerHTML+='<option value="'+y+'"'+(y===cmpYear?' selected':'')+'>'+y+'</option>';});cs.onchange=function(){curYear=+cs.value;selectedMonths=new Set(getAM(curYear));buildMonthSelect();refreshActive();};cm.onchange=function(){cmpYear=+cm.value;refreshActive();};updateMB();}
 function initT3CatFilter(){
 function buildCatChk(cid,sel,btnId,cb){var el=document.getElementById(cid);el.innerHTML='';var ac=document.createElement('label');var acb=document.createElement('input');acb.type='checkbox';acb.checked=!sel.size;ac.appendChild(acb);ac.appendChild(document.createTextNode('All'));ac.style.fontWeight='600';acb.onchange=function(){if(this.checked){sel.clear();el.querySelectorAll('input').forEach(function(c){c.checked=false;});this.checked=true;}document.getElementById(btnId).textContent=t4Lbl(sel,'All');cb();};el.appendChild(ac);CATS.forEach(function(c){var l=document.createElement('label');var cb2=document.createElement('input');cb2.type='checkbox';cb2.checked=sel.has(c);l.appendChild(cb2);l.appendChild(document.createTextNode(c));cb2.onchange=function(){if(this.checked){sel.add(c);acb.checked=false;}else{sel.delete(c);if(!sel.size)acb.checked=true;}document.getElementById(btnId).textContent=t4Lbl(sel,'All');cb();};el.appendChild(l);});}
 buildCatChk('t3s2CatDrop',t3CatSel,'t3s2CatBtn',refreshT3S2);
 }
-function buildMonthSelect(){var el=document.getElementById('mainMonthDrop');if(!el)return;el.innerHTML='';var av=getAM(curYear);// All option
-var ac=document.createElement('label');var acb=document.createElement('input');acb.type='checkbox';acb.checked=selectedMonths.size===av.length||selectedMonths.size===0;ac.appendChild(acb);ac.appendChild(document.createTextNode('All'));ac.style.fontWeight='600';acb.onchange=function(){if(this.checked){selectedMonths=new Set(av);el.querySelectorAll('input').forEach(function(c){c.checked=false;});this.checked=true;}document.getElementById('mainMonthBtn').textContent=t4Lbl(selectedMonths,'All',av.length);refreshActive();};el.appendChild(ac);
-av.forEach(function(m){var l=document.createElement('label');var cb=document.createElement('input');cb.type='checkbox';cb.checked=selectedMonths.has(m);l.appendChild(cb);l.appendChild(document.createTextNode(MN[m]));cb.onchange=function(){if(this.checked){selectedMonths.add(m);acb.checked=false;}else{selectedMonths.delete(m);if(!selectedMonths.size){selectedMonths=new Set(av);acb.checked=true;}}document.getElementById('mainMonthBtn').textContent=t4Lbl(selectedMonths,'All',av.length);refreshActive();};el.appendChild(l);});// Set button label correctly on build
-document.getElementById('mainMonthBtn').textContent=t4Lbl(selectedMonths,'All',av.length);}
+function buildMonthSelect(){
+var el=document.getElementById('mainMonthDrop');if(!el)return;
+el.innerHTML='';
+var av=getAM(curYear);
+// isAll: only when ALL available months are explicitly selected (not empty)
+var isAll=selectedMonths.size>0&&selectedMonths.size===av.length;
+var isEmpty=selectedMonths.size===0;
+// All checkbox
+var ac=document.createElement('label');
+var acb=document.createElement('input');
+acb.type='checkbox';
+acb.id='mainMonthAll';
+acb.checked=isAll;
+ac.appendChild(acb);
+ac.appendChild(document.createTextNode('All'));
+ac.style.fontWeight='600';
+acb.onchange=function(){
+  if(this.checked){
+    selectedMonths=new Set(av);
+    el.querySelectorAll('input[data-month]').forEach(function(cb){cb.checked=false;});
+    document.getElementById('mainMonthBtn').textContent='All ▾';
+  }else{
+    selectedMonths=new Set();
+    document.getElementById('mainMonthBtn').textContent='Select ▾';
+  }
+  refreshActive();
+};
+el.appendChild(ac);
+// Individual month checkboxes
+av.forEach(function(m){
+  var l=document.createElement('label');
+  var cb=document.createElement('input');
+  cb.type='checkbox';
+  cb.setAttribute('data-month',m);
+  cb.checked=!isAll&&!isEmpty&&selectedMonths.has(m);
+  l.appendChild(cb);
+  l.appendChild(document.createTextNode(MN[m]));
+  cb.onchange=function(){
+    acb.checked=false;
+    if(this.checked){
+      selectedMonths.add(m);
+    }else{
+      selectedMonths.delete(m);
+      if(!selectedMonths.size){
+        document.getElementById('mainMonthBtn').textContent='Select ▾';
+        refreshActive();
+        return;
+      }
+    }
+    // Check if all months now selected — mark All
+    if(selectedMonths.size===av.length){
+      selectedMonths=new Set(av);
+      acb.checked=true;
+      el.querySelectorAll('input[data-month]').forEach(function(c){c.checked=false;});
+      document.getElementById('mainMonthBtn').textContent='All ▾';
+    }else{
+      document.getElementById('mainMonthBtn').textContent=t4Lbl(selectedMonths,'All',av.length);
+    }
+    refreshActive();
+  };
+  el.appendChild(l);
+});
+// Set button label
+var lbl=isEmpty?'Select ▾':(isAll?'All ▾':t4Lbl(selectedMonths,'All',av.length));
+document.getElementById('mainMonthBtn').textContent=lbl;
+}
 function onMonthSelectChange(v){if(v==='All'){selectedMonths=new Set(getAM(curYear));}else{selectedMonths=new Set([+v]);}buildMonthSelect();refreshActive();}
 function updateMB(){buildMonthSelect();}
 function selectAllMonths(){selectedMonths=new Set(getAM(curYear));buildMonthSelect();refreshActive();}
 function clearMonths(){selectedMonths=new Set(getAM(curYear));buildMonthSelect();refreshActive();}
-function resetMainFilters(){var yEl=document.getElementById('curYear');if(yEl)curYear=+yEl.value;var cEl=document.getElementById('cmpYear');if(cEl)cmpYear=+cEl.value;selectedMonths=new Set(getAM(curYear));buildMonthSelect();document.getElementById('mainMonthBtn').textContent='All ▾';refreshActive();}
+function resetMainFilters(){var yEl=document.getElementById('curYear');if(yEl)curYear=+yEl.value;var cEl=document.getElementById('cmpYear');if(cEl)cmpYear=+cEl.value;selectedMonths=new Set();buildMonthSelect();refreshActive();}
 
 function getTitle(){var ms=Array.from(selectedMonths).sort(function(a,b){return a-b;});if(!ms.length)return'No Period Selected';if(ms.length===1)return MN[ms[0]]+' '+curYear+' vs '+MN[ms[0]]+' '+cmpYear+' Analysis';var cg=true;for(var i=1;i<ms.length;i++)if(ms[i]!==ms[i-1]+1){cg=false;break;}var f=MN[ms[0]],l=MN[ms[ms.length-1]];return cg?f+'-'+l+' '+curYear+' vs '+f+'-'+l+' '+cmpYear+' Analysis':ms.map(function(m){return MN[m];}).join(', ')+' '+curYear+' vs '+cmpYear+' Analysis';}
 
