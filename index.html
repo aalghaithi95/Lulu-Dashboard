@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lulu Category Performance Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+// Fallback to cdnjs 0.18.5 if the primary CDN fails to load
+if(typeof XLSX==='undefined'){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>');}
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{overflow-x:hidden}
@@ -475,17 +479,37 @@ reader.onerror=function(){ov.classList.add('hidden');alert('File read failed');}
 reader.onload=function(e){setTimeout(function(){
 try{
 showStatus('Parsing Excel…');
-var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',raw:true});
-var sn=wb.SheetNames.find(function(n){return n.toLowerCase()==='data';})||wb.SheetNames[0];
+var wb;
+var useDense=false;
+try{
+try{wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',raw:true,dense:true,cellStyles:false,cellHTML:false,cellFormula:false});useDense=true;}
+catch(denseErr){wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',raw:true,cellStyles:false,cellHTML:false,cellFormula:false});useDense=false;}
+}
+catch(xlErr){ov.classList.add('hidden');alert('Excel read failed: '+xlErr.message+'\n\nThe file may be too large for the browser. Try closing other tabs and retrying.');return;}
+e.target.result=null;
+if(!wb||!wb.SheetNames||!wb.SheetNames.length){ov.classList.add('hidden');alert('No sheets found in this file.');return;}
+var KNOWN=['data','lulu report - oman','lulu report','sheet1','raw','rawdata'];
+var sn=null;
+for(var ki=0;ki<KNOWN.length;ki++){var kn=KNOWN[ki];var found=wb.SheetNames.find(function(n){return n.toLowerCase().trim()===kn;});if(found&&wb.Sheets[found]){sn=found;break;}}
+if(!sn){sn=wb.SheetNames[0];}
+if(!sn||!wb.Sheets[sn]){ov.classList.add('hidden');alert('Could not find a data sheet. Sheets: '+wb.SheetNames.join(', '));return;}
 showStatus('Reading sheet "'+sn+'"…');
 var ws=wb.Sheets[sn];
-var ref=ws['!ref'];if(!ref){ov.classList.add('hidden');alert('Empty sheet');return;}
-var range=XLSX.utils.decode_range(ref);
-var nR=range.e.r,nC=range.e.c;
-// Read headers
+var denseArr=useDense?ws['!data']:null;
+var ref=ws['!ref'];
+var nR,nC;
+if(denseArr&&denseArr.length){
+  nR=denseArr.length-1;nC=0;
+  for(var r0=0;r0<Math.min(denseArr.length,5);r0++){if(denseArr[r0])nC=Math.max(nC,denseArr[r0].length-1);}
+}else{
+  denseArr=null;
+  if(!ref){ov.classList.add('hidden');alert('Sheet "'+sn+'" appears empty.\n\nAll sheets: '+wb.SheetNames.join(', '));return;}
+  var range=XLSX.utils.decode_range(ref);nR=range.e.r;nC=range.e.c;
+}
+function hdrVal(c){if(denseArr){var rr=denseArr[0];if(!rr)return undefined;var cc=rr[c];return cc?cc.v:undefined;}var cell=ws[XLSX.utils.encode_cell({r:0,c:c})];return cell?cell.v:undefined;}
 var ci={};
-for(var c=0;c<=nC;c++){var a=XLSX.utils.encode_cell({r:0,c:c});var cell=ws[a];if(!cell)continue;
-var h=String(cell.v||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+for(var c=0;c<=nC;c++){var hv=hdrVal(c);if(hv==null)continue;
+var h=String(hv||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');
 if(h==='date')ci.dt=c;else if(h==='category')ci.cat=c;else if(h==='brand')ci.br=c;
 else if(h==='material')ci.mat=c;else if(h==='description')ci.desc=c;
 else if(h==='size')ci.sz=c;else if(h==='uom')ci.uom=c;else if(h==='salestype')ci.st=c;
@@ -495,35 +519,114 @@ else if(h==='outlets'||h==='outlet')ci.out=c;
 else if(h==='wilyat'||h==='wilayat')ci.wil=c;}
 if(ci.dt===undefined||ci.cat===undefined||ci.br===undefined||ci.sal===undefined){
 ov.classList.add('hidden');alert('Missing required columns');return;}
-// Build flat rows array using sheet_to_csv for ONE row at a time via encode_cell
-// Actually faster: use sheet_to_json with header:1 for array-of-arrays
-showStatus('Converting data…');
-setTimeout(function(){
-try{
-var raw=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
-wb=null;ws=null;
-showStatus(raw.length+' rows. Building indices…');
-setTimeout(function(){try{buildFromArrays(raw,ci,file.name,ov);}catch(err){ov.classList.add('hidden');alert('Build error: '+err.message);}},20);
-}catch(err){ov.classList.add('hidden');alert('Convert error: '+err.message);}
-},20);
+showStatus('Building indices…');
+setTimeout(function(){try{buildFromSheet(ws,ci,nR,nC,wb,file.name,ov,denseArr);}catch(err){ov.classList.add('hidden');alert('Build error: '+err.message);}},20);
 }catch(err){ov.classList.add('hidden');alert('Parse error: '+err.message);}
 },20);};
 reader.readAsArrayBuffer(file);
 }
+function buildFromSheet(ws,ci,nR,nC,wbRef,fileName,ov,denseArr){
+IDX={};IIDX={};DIDX={};MONTHLY_PCS={};OIDX={};OPDX={};_cm={};NEW_PRODS=null;
+var CHUNK=8000,row=1,total=nR,ys={},rc=0,firstSeen={},errCount=0,lastErr='';
+function cv(r,c){if(denseArr){var rr=denseArr[r];if(!rr)return undefined;var cc=rr[c];return cc?cc.v:undefined;}var cell=ws[XLSX.utils.encode_cell({r:r,c:c})];return cell?cell.v:undefined;}
+function doChunk(){
+var end=Math.min(row+CHUNK,total+1);
+showStatus('Processing '+row.toLocaleString()+' / '+total.toLocaleString()+(errCount?' ('+errCount+' skipped)':''));
+for(var i=row;i<end;i++){
+try{
+var dv=cv(i,ci.dt);if(dv==null||dv==='')continue;
+var yr,mn,n=+dv;
+if(n>0&&n<200000){var dd=new Date((n-25569)*864e5);yr=dd.getUTCFullYear();mn=dd.getUTCMonth()+1;}
+else{var ds=String(dv);var iso=ds.match(/^(\d{4})-(\d{1,2})/);if(iso){yr=+iso[1];mn=+iso[2];}
+else{var us=ds.match(/^(\d{1,2})[\/\-]\d{1,2}[\/\-](\d{4})/);if(us){yr=+us[2];mn=+us[1];}else continue;}}
+if(!yr||yr<2000||yr>2100)continue;
+var brand=String(cv(i,ci.br)||'').trim().toUpperCase();if(!brand)continue;
+var sales=+(cv(i,ci.sal))||0;if(!sales)continue;
+var cat=mapCat(String(cv(i,ci.cat)||'').trim());
+ys[yr]=1;
+var st=ci.st!==undefined?String(cv(i,ci.st)||'').trim():'Regular';if(st!=='Regular'&&st!=='Promotion')st='Regular';
+var mat=ci.mat!==undefined?String(cv(i,ci.mat)||'').trim():'';
+var desc=ci.desc!==undefined?String(cv(i,ci.desc)||'').trim():'';
+var sz=ci.sz!==undefined?String(cv(i,ci.sz)||'').trim():'';
+var uom=ci.uom!==undefined?String(cv(i,ci.uom)||'').trim():'';
+var qty=ci.qty!==undefined?+(cv(i,ci.qty))||0:0;
+var outlet=ci.out!==undefined?String(cv(i,ci.out)||'').trim():'';
+var wilyat=ci.wil!==undefined?String(cv(i,ci.wil)||'').trim():'';
+var matKey=mat+'|'+desc;
+var i1=IDX[yr]||(IDX[yr]={});var i2=i1[mn]||(i1[mn]={});var i3=i2[cat]||(i2[cat]={});
+i3[brand]=(i3[brand]||0)+sales;
+if(outlet){var o1=OIDX[yr]||(OIDX[yr]={});var o2=o1[mn]||(o1[mn]={});
+var o3=o2[outlet]||(o2[outlet]={_wil:wilyat});var o4=o3[cat]||(o3[cat]={});
+var bstKey=brand+'|'+st;var o5=o4[bstKey]||(o4[bstKey]={sales:0,qty:0,st:st,brand:brand});o5.sales+=sales;o5.qty+=qty;
+var p1=OPDX[yr]||(OPDX[yr]={});var p2=p1[mn]||(p1[mn]={});var p3=p2[outlet]||(p2[outlet]={});var p4=p3[cat]||(p3[cat]={});var p5=p4[st]||(p4[st]={});
+var pmk=mat?mat+'|'+desc:'|'+desc;var px=p5[pmk];if(!px){px=p5[pmk]={brand:brand,desc:desc,mat:mat,size:sz,sales:0,qty:0};}px.sales+=sales;px.qty+=qty;}
+var j1=IIDX[yr]||(IIDX[yr]={});var j2=j1[mn]||(j1[mn]={});var j3=j2[cat]||(j2[cat]={});
+var j4=j3[st]||(j3[st]={});
+var jx=j4[matKey];if(!jx){jx=j4[matKey]={brand:brand,desc:desc,mat:mat,size:sz,uom:uom,sales:0,qty:0};}
+jx.sales+=sales;jx.qty+=qty;
+if(brand==='DELICIO'){var d1=DIDX[yr]||(DIDX[yr]={});var d2=d1[mn]||(d1[mn]={});
+var d3=d2[cat]||(d2[cat]={});var d4=d3[st]||(d3[st]={});
+var dx=d4[matKey];if(!dx){dx=d4[matKey]={desc:desc,mat:mat,size:sz,uom:uom,sales:0,qty:0};}
+dx.sales+=sales;dx.qty+=qty;}
+if(mat){var ym=yr*100+mn;var mp=MONTHLY_PCS[mat]||(MONTHLY_PCS[mat]={});
+mp[ym]=(mp[ym]||0)+qty;
+var fs=firstSeen[mat];if(!fs||ym<fs.ym)firstSeen[mat]={ym:ym,year:yr,month:mn,cat:cat,st:st,brand:brand,desc:desc,size:sz,uom:uom};}
+rc++;
+}catch(rowErr){errCount++;lastErr=rowErr.message;}
+}
+if(denseArr){for(var fi=row;fi<end;fi++)denseArr[fi]=null;}
+else{for(var fi=row;fi<end;fi++){for(var fc=0;fc<=nC;fc++){delete ws[XLSX.utils.encode_cell({r:fi,c:fc})];}}}
+row=end;
+if(row<=total){setTimeout(doChunk,1);return;}
+showStatus('Finalizing…');
+if(errCount>0)console.warn('Skipped '+errCount+' rows. Last error: '+lastErr);
+try{if(wbRef&&wbRef.Sheets)wbRef.Sheets={};}catch(e){}
+setTimeout(function(){
+NEW_PRODS={};for(var m in firstSeen){if(firstSeen[m].ym>=202501)NEW_PRODS[m]=firstSeen[m];}
+MONTHS_BY_YEAR={};for(var y in IDX){var ms=Object.keys(IDX[y]).map(Number).sort(function(a,b){return a-b;});MONTHS_BY_YEAR[+y]=ms;}
+var outSet={};for(var y in OIDX)for(var m in OIDX[y])for(var o in OIDX[y][m])if(o!=='_wil')outSet[o]=1;
+ALL_OUTLETS=Object.keys(outSet).sort();
+finishLoad(ys,rc,fileName,ov);
+},20);
+}
+setTimeout(doChunk,1);
+}
+function finishLoad(ys,rc,fileName,ov){
+ALL_YEARS=Object.keys(ys).map(Number).sort(function(a,b){return a-b;});
+if(!ALL_YEARS.length){ov.classList.add('hidden');alert('No valid data');return;}
+curYear=ALL_YEARS[ALL_YEARS.length-1];
+cmpYear=ALL_YEARS.length>1?ALL_YEARS[ALL_YEARS.length-2]:curYear;
+var av=getAM(curYear);
+selectedMonths=new Set(av);
+if(!selectedMonths.size&&av.length)selectedMonths=new Set(av);
+document.getElementById('uploadZone').classList.add('hidden');
+document.getElementById('loadedBar').classList.remove('hidden');
+document.getElementById('tabBar').classList.remove('hidden');
+document.getElementById('filtersBar').classList.remove('hidden');
+document.getElementById('tab1Content').classList.remove('hidden');
+document.getElementById('loadedFileName').textContent=fileName;
+document.getElementById('loadedMeta').textContent='('+rc.toLocaleString()+' rows | '+ALL_YEARS.map(function(y){return y+':'+getAM(y).length+'mo';}).join(' | ')+')';
+showStatus('Initializing…');
+setTimeout(function(){
+try{initFilters();}catch(e){console.warn('initFilters:',e);}try{initT3CatFilter();}catch(e){console.warn('initT3CatFilter:',e);}try{initT4Filters();}catch(e){console.warn('initT4Filters:',e);}try{initT5();}catch(e){console.warn('initT5:',e);}try{updateTrendFilters();}catch(e){console.warn('updateTrendFilters:',e);}try{initT6();}catch(e){console.warn('initT6:',e);}try{refreshActive();}catch(e){console.warn('refreshActive:',e);}
+ov.classList.add('hidden');
+},20);
+}
 function buildFromArrays(raw,ci,fileName,ov){
 IDX={};IIDX={};DIDX={};MONTHLY_PCS={};OIDX={};OPDX={};_cm={};NEW_PRODS=null;
-var CHUNK=10000,idx=1,total=raw.length,ys={},rc=0,firstSeen={};
+var CHUNK=10000,idx=1,total=raw.length,ys={},rc=0,firstSeen={},errCount=0,lastErr='';
 function doChunk(){
 var end=Math.min(idx+CHUNK,total);
-showStatus('Processing '+idx.toLocaleString()+' / '+total.toLocaleString());
+showStatus('Processing '+idx.toLocaleString()+' / '+total.toLocaleString()+(errCount?' ('+errCount+' skipped)':''));
 for(var i=idx;i<end;i++){
 var f=raw[i];if(!f)continue;
+try{
 var dv=f[ci.dt];if(dv==null||dv==='')continue;
 var yr,mn,n=+dv;
 if(n>0&&n<200000){var dd=new Date((n-25569)*864e5);yr=dd.getUTCFullYear();mn=dd.getUTCMonth()+1;}
 else{var ds=String(dv);var iso=ds.match(/^(\d{4})-(\d{1,2})/);if(iso){yr=+iso[1];mn=+iso[2];}
 else{var us=ds.match(/^(\d{1,2})[\/\-]\d{1,2}[\/\-](\d{4})/);if(us){yr=+us[2];mn=+us[1];}else continue;}}
-if(yr<2000||yr>2100)continue;
+if(!yr||yr<2000||yr>2100)continue;
 var brand=String(f[ci.br]||'').trim().toUpperCase();if(!brand)continue;
 var sales=+(f[ci.sal])||0;if(!sales)continue;
 var cat=mapCat(String(f[ci.cat]||'').trim());
@@ -542,7 +645,6 @@ i3[brand]=(i3[brand]||0)+sales;
 if(outlet){var o1=OIDX[yr]||(OIDX[yr]={});var o2=o1[mn]||(o1[mn]={});
 var o3=o2[outlet]||(o2[outlet]={_wil:wilyat});var o4=o3[cat]||(o3[cat]={});
 var bstKey=brand+'|'+st;var o5=o4[bstKey]||(o4[bstKey]={sales:0,qty:0,st:st,brand:brand});o5.sales+=sales;o5.qty+=qty;
-// OPDX: outlet+product index for drilldown
 var p1=OPDX[yr]||(OPDX[yr]={});var p2=p1[mn]||(p1[mn]={});var p3=p2[outlet]||(p2[outlet]={});var p4=p3[cat]||(p3[cat]={});var p5=p4[st]||(p4[st]={});
 var pmk=mat?mat+'|'+desc:'|'+desc;var px=p5[pmk];if(!px){px=p5[pmk]={brand:brand,desc:desc,mat:mat,size:sz,sales:0,qty:0};}px.sales+=sales;px.qty+=qty;}
 var j1=IIDX[yr]||(IIDX[yr]={});var j2=j1[mn]||(j1[mn]={});var j3=j2[cat]||(j2[cat]={});
@@ -557,10 +659,12 @@ if(mat){var ym=yr*100+mn;var mp=MONTHLY_PCS[mat]||(MONTHLY_PCS[mat]={});
 mp[ym]=(mp[ym]||0)+qty;
 var fs=firstSeen[mat];if(!fs||ym<fs.ym)firstSeen[mat]={ym:ym,year:yr,month:mn,cat:cat,st:st,brand:brand,desc:desc,size:sz,uom:uom};}
 rc++;raw[i]=null;
+}catch(rowErr){errCount++;lastErr=rowErr.message;raw[i]=null;}
 }
 idx=end;
 if(idx<total){setTimeout(doChunk,1);return;}
 showStatus('Finalizing…');
+if(errCount>0){console.warn('Skipped '+errCount+' rows due to errors. Last error: '+lastErr);}
 raw=null;
 setTimeout(function(){
 NEW_PRODS={};for(var m in firstSeen){if(firstSeen[m].ym>=202501)NEW_PRODS[m]=firstSeen[m];}
