@@ -1235,9 +1235,14 @@ h+='<tr class="total-row" style="font-size:12px;line-height:1.8"><td>Total</td><
 }
 document.getElementById('t6s1').innerHTML=rows.length?h:'<p style="padding:10px;color:#999">No data for selected brand.</p>';}
 function getLastSaleByMat(brand){
-// Build map of mat -> latest YM (yr*100+mn) where sales>0 for this brand
+// Build map of matKey -> latest YM (yr*100+mn) where sales>0 for this brand.
+// Respects the main outlet filter; keys match the byMat aggregation (mat, or NOMAT_desc fallback).
 var lastByMat={};
-for(var y in IIDX){var yr=+y;for(var m in IIDX[y]){var mn=+m;var ym=yr*100+mn;for(var cat in IIDX[y][m]){for(var st in IIDX[y][m][cat]){var d=IIDX[y][m][cat][st];for(var k in d){var it=d[k];if(it.brand!==brand||it.sales<=0||!it.mat)continue;if(!lastByMat[it.mat]||lastByMat[it.mat]<ym)lastByMat[it.mat]=ym;}}}}}
+if(mainOutlet==='All'){
+for(var y in IIDX){var yr=+y;for(var m in IIDX[y]){var mn=+m;var ym=yr*100+mn;for(var cat in IIDX[y][m]){for(var st in IIDX[y][m][cat]){var d=IIDX[y][m][cat][st];for(var k in d){var it=d[k];if(it.brand!==brand||it.sales<=0)continue;var mk=it.mat||('NOMAT_'+it.desc);if(!lastByMat[mk]||lastByMat[mk]<ym)lastByMat[mk]=ym;}}}}}
+}else{
+for(var y in OPDX){var yr=+y;for(var m in OPDX[y]){var mn=+m;var ym=yr*100+mn;var oc=OPDX[y][m][mainOutlet];if(!oc)continue;for(var cat in oc){var stMap=oc[cat];for(var st in stMap){var d=stMap[st];for(var k in d){var it=d[k];if(it.brand!==brand||it.sales<=0)continue;var mk=it.mat||('NOMAT_'+it.desc);if(!lastByMat[mk]||lastByMat[mk]<ym)lastByMat[mk]=ym;}}}}}
+}
 return lastByMat;
 }
 function fmtYM(ym){if(!ym)return'';var yr=Math.floor(ym/100);var mn=ym%100;return MN[mn]+'-'+yr;}
@@ -1248,7 +1253,7 @@ var lastByMat=getLastSaleByMat(t6Brand);
 var allItems=[];
 for(var ci2=0;ci2<catsToProcess.length;ci2++){var catV=catsToProcess[ci2];var cmpI=getBrandItems(cmpYear,ms,catV,t6s2Type,t6Brand),curI=getBrandItems(curYear,ms,catV,t6s2Type,t6Brand);
 var byMat={};function addToMat(src,side){for(var k in src){var it=src[k];var mkey=it.cat+'|'+it.st+'|'+it.mat;if(!byMat[mkey])byMat[mkey]={cat:it.cat,st:it.st,brand:it.brand,mat:it.mat,desc:mName(it.mat,it.desc),size:mSize(it.mat,it.size),cmpV:0,curV:0,cmpQ:0,curQ:0};if(side==='cmp'){byMat[mkey].cmpV+=it.sales;byMat[mkey].cmpQ+=it.qty;}else{byMat[mkey].curV+=it.sales;byMat[mkey].curQ+=it.qty;}}}addToMat(cmpI,'cmp');addToMat(curI,'cur');
-for(var k in byMat){var it=byMat[k];if(it.cmpV===0&&it.curV===0)continue;it.vChg=it.cmpV?(it.curV-it.cmpV)/it.cmpV:(it.curV>0?1:0);it.qChg=it.cmpQ?(it.curQ-it.cmpQ)/it.cmpQ:(it.curQ>0?1:0);it.lastYM=lastByMat[it.mat]||0;var movement=it.curV-it.cmpV;if(t6s2DG==='Decline'&&movement>=0)continue;if(t6s2DG==='Growth'&&movement<=0)continue;if(t6s2Active==='Active'&&it.curV<=0)continue;allItems.push(it);}}
+for(var k in byMat){var it=byMat[k];if(it.cmpV===0&&it.curV===0)continue;it.vChg=it.cmpV?(it.curV-it.cmpV)/it.cmpV:(it.curV>0?1:0);it.qChg=it.cmpQ?(it.curQ-it.cmpQ)/it.cmpQ:(it.curQ>0?1:0);it.lastYM=lastByMat[it.mat||('NOMAT_'+it.desc)]||0;var movement=it.curV-it.cmpV;if(t6s2DG==='Decline'&&movement>=0)continue;if(t6s2DG==='Growth'&&movement<=0)continue;if(t6s2Active==='Active'&&it.curV<=0)continue;allItems.push(it);}}
 // Sort by cat sum desc, then within cat by curV desc
 var catSums={};for(var i=0;i<allItems.length;i++){var c=allItems[i].cat;catSums[c]=(catSums[c]||0)+allItems[i].curV;}
 allItems.sort(function(a,b){var ca=(catSums[b.cat]||0)-(catSums[a.cat]||0);return ca!==0?ca:b.curV-a.curV;});
