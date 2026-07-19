@@ -442,7 +442,7 @@ tr:hover{background:#e3f2fd}
 </div>
 <script>
 /* ═══ CONSTANTS ═══ */
-var CATS=['Mayonnaise','Salad Dressings','Hot Sauce','Ketchup','Pasta & Pizza','Sauces','C&E','Other'];
+var CATS=['Mayonnaise','Salad Dressings','Hot Sauce','Ketchup','Pasta & Pizza','Sauces','C&E','Jams','Other'];
 var MN=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var TOP_N=8;
 var PER_CASE={"306952":12,"306954":12,"306955":12,"306956":12,"340088":12,"739102":12,"739103":12,"739105":12,"807245":12,"807246":12,"807248":12,"807249":12,"1261897":12,"2193773":12,"2193775":12,"2405526":12,"2405527":12,"2405528":12,"1318619":6,"1746161":6,"2275295":12,"2275296":12,"2333287":6,"2333289":6,"829070":4,"260568":6,"329983":12,"329984":12,"567280":12,"1024980":12,"1024981":12,"1049698":12,"1049718":6,"2193730":12,"2193772":12,"2405530":12,"2428574":12,"2333286":6,"347418":6,"1044332":6,"1371596":4,"2033401":12,"2139113":12,"2275293":12,"2275294":12,"2060164":6,"2060165":6,"2275298":6,"2484363":12,"2571828":6,"340080":12,"382748":12,"1205276":12,"1205277":12,"2405531":12,"2405532":12,"2428572":12,"1641189":6,"2060169":12,"2571688":6,"2571824":6,"993296":24,"1115688":24,"1115690":24,"1115692":24,"1115693":24,"329440":144,"329973":144,"329977":144,"329978":144,"329979":144,"329980":144,"905530":12,"905532":12,"905533":12,"932508":12,"2228298":12,"2228297":12,"281996":12,"281997":12,"2428521":12,"374974":6,"2546138":12,"2571747":3};
@@ -504,7 +504,7 @@ function mSize(mat,s){if(HS_NAMES[mat])return'175';var m=MNAMES[mat];return m?m.
 function getAM(yr){return MONTHS_BY_YEAR[yr]||[];}
 
 function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/'/g,'\\u0027').replace(/"/g,'&quot;');}
-var _cm={};function mapCat(c){if(typeof c!=='string')return'Other';var t=c.trim();if(_cm[t]!==undefined)return _cm[t];var r;if(t.toLowerCase()==='sauces')r='Sauces';else if(t==='Mayonnaise'||t==='Salad Dressings'||t==='Hot Sauce'||t==='Ketchup'||t==='Pasta & Pizza'||t==='C&E'||t==='Other')r=t;else r='Other';_cm[t]=r;return r;}
+var _cm={};function mapCat(c){if(typeof c!=='string')return'Other';var t=c.trim();if(_cm[t]!==undefined)return _cm[t];var r;if(t.toLowerCase()==='sauces')r='Sauces';else if(t.toLowerCase()==='jams'||t.toLowerCase()==='jam')r='Jams';else if(t==='Mayonnaise'||t==='Salad Dressings'||t==='Hot Sauce'||t==='Ketchup'||t==='Pasta & Pizza'||t==='C&E'||t==='Jams'||t==='Other')r=t;else r='Other';_cm[t]=r;return r;}
 
 /* ═══ FILE HANDLING ═══ */
 function setupFileHandlers(){var z=document.getElementById('uploadZone'),i1=document.getElementById('fileInput'),i2=document.getElementById('fileInput2');z.addEventListener('dragover',function(e){e.preventDefault();z.classList.add('dragover');});z.addEventListener('dragleave',function(){z.classList.remove('dragover');});z.addEventListener('drop',function(e){e.preventDefault();z.classList.remove('dragover');if(e.dataTransfer.files.length)processFile(e.dataTransfer.files[0]);});i1.addEventListener('change',function(e){if(e.target.files.length)processFile(e.target.files[0]);});i2.addEventListener('change',function(e){if(e.target.files.length)processFile(e.target.files[0]);e.target.value='';});}
@@ -621,7 +621,7 @@ showStatus('Finalizing…');
 if(errCount>0)console.warn('Skipped '+errCount+' rows. Last error: '+lastErr);
 try{if(wbRef&&wbRef.Sheets)wbRef.Sheets={};}catch(e){}
 setTimeout(function(){
-ALL_PRODS=firstSeen;NEW_PRODS={};for(var m in firstSeen){if(firstSeen[m].ym>=202501)NEW_PRODS[m]=firstSeen[m];}
+ALL_PRODS=firstSeen;NEW_PRODS={};for(var m in firstSeen){var _th=firstSeen[m].cat==='Jams'?202607:202501;if(firstSeen[m].ym>=_th)NEW_PRODS[m]=firstSeen[m];}
 MONTHS_BY_YEAR={};for(var y in IDX){var ms=Object.keys(IDX[y]).map(Number).sort(function(a,b){return a-b;});MONTHS_BY_YEAR[+y]=ms;}
 var outSet={};for(var y in OIDX)for(var m in OIDX[y])for(var o in OIDX[y][m])if(o!=='_wil')outSet[o]=1;
 ALL_OUTLETS=Object.keys(outSet).sort();
@@ -707,7 +707,7 @@ showStatus('Finalizing…');
 if(errCount>0){console.warn('Skipped '+errCount+' rows due to errors. Last error: '+lastErr);}
 raw=null;
 setTimeout(function(){
-ALL_PRODS=firstSeen;NEW_PRODS={};for(var m in firstSeen){if(firstSeen[m].ym>=202501)NEW_PRODS[m]=firstSeen[m];}
+ALL_PRODS=firstSeen;NEW_PRODS={};for(var m in firstSeen){var _th=firstSeen[m].cat==='Jams'?202607:202501;if(firstSeen[m].ym>=_th)NEW_PRODS[m]=firstSeen[m];}
 MONTHS_BY_YEAR={};for(var y in IDX){var ms=Object.keys(IDX[y]).map(Number).sort(function(a,b){return a-b;});MONTHS_BY_YEAR[+y]=ms;}
 var outSet={};for(var y in OIDX)for(var m in OIDX[y])for(var o in OIDX[y][m])if(o!=='_wil')outSet[o]=1;
 ALL_OUTLETS=Object.keys(outSet).sort();
